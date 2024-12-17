@@ -40,12 +40,15 @@ void QtFunEmulatorApplication::paintSomethingToBuffer()
   painter.setBrush(QBrush(QColor(0, 0, 0, 0)));//remove brush
 
   painter.setPen(Qt::white);
-  painter.drawEllipse(QPointF(fanCenterX, fanCenterY), fanRadiusPx, fanRadiusPx);//FAN canvas
+
+  const int fanCenter = buffer->width() / 2;
+  const double fanRadiusPx  = fanCenter * 0.99;
+  painter.drawEllipse(QPointF(fanCenter, fanCenter), fanRadiusPx, fanRadiusPx);//FAN canvas
 
   painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
   if (uiTab == UI_TAB_MCU_PWM)
-    DrawMcuPwm::draw(painter, counterFrames);
+    DrawMcuPwm::draw(painter, ui.spinBoxFps->value(), counterFrames, fanCenter, fanRadiusPx);
   else if (uiTab == UI_TAB_WS2118)
     DrawWs2812::draw();
 

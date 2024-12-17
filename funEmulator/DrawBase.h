@@ -6,10 +6,6 @@
 inline  const QColor rgbColors[3] = { QColor(255,0,0),QColor(0,255,0),QColor(0,0,255) };
 
 
-inline const int kFps = 24;
-inline uint16_t fanCenterX = 202;
-inline uint16_t fanCenterY = 202;
-inline uint16_t fanRadiusPx = 200;
 inline uint8_t fanBladesCount = 1;
 
 inline double simulationFps = 24;
