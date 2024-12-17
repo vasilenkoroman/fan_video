@@ -32,7 +32,7 @@ namespace DrawMcuPwm
 		/*Type of PWM modulation.*/
 		const PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
 
-		uint32_t COLOR_BIT_DEPTH = 8;//1 to 16
+		uint32_t colorBitDepth = 8;//1 to 16
 
 		/* One MCU PWM cycle length.
 			For example: if getMcuPwmCycleLengthTicks == 8:
@@ -42,11 +42,11 @@ namespace DrawMcuPwm
 		uint32_t getMcuPwmCycleLengthTicks()
 		{
 			if (pwmAlign == PWM_CENTER_ALIGN)
-				return 2 << COLOR_BIT_DEPTH;
-			return 1 << COLOR_BIT_DEPTH;
+				return 2 << colorBitDepth;
+			return 1 << colorBitDepth;
 		}
 
-		uint32_t cpuFrequencyHz = 24000000;
+		uint32_t cpuFrequencyHz = 48 * 1000 * 1000;
 
 		uint32_t cpuFrequencyDivider = 2;// From 2 to 256
 
@@ -99,23 +99,51 @@ namespace DrawMcuPwm
 		mcuPwmCountChannelsStrobe = 8, brightness = 12.5%, 64 LEDs, 21 RGB LEDs
 		can set from 0 to mcuPwmHwOutputs - 1
 		*/
-		uint8_t mcuPwmCountChannelsStrobe = 4;
+		uint8_t mcuPwmCountChannelsStrobe = 8;
 
 		uint8_t mcuPwmCountChannelsLed()
 		{
 			return this->mcuPwmHwOutputs - this->mcuPwmCountChannelsStrobe;//12
 		}
 
+		uint8_t getRealCountChannelsStrobe()
+		{
+			return this->mcuPwmCountChannelsStrobe ? this->mcuPwmCountChannelsStrobe : 1;
+		}
+
+		/* 1 forgrayscale, 3 for rgb*/
+		uint32_t colorCount = 3;
+
 		uint32_t getRgbLedCount()
 		{
-			return this->mcuPwmCountChannelsLed() * this->mcuPwmCountChannelsStrobe / 3;
+			return this->mcuPwmCountChannelsLed() * this->getRealCountChannelsStrobe() / colorCount;
 		}
 
 		const double ledStepPxBetweenRGB = 3;
 	};
 
+	inline void drawLineFromArc(QPainter& painter, QRectF r, int aStart, int aLength) {//GPT code
+		// Радиус дуги (используем меньшую сторону для корректности)
+		double radiusX = r.width() / 2.0;
+		double radiusY = r.height() / 2.0;
+		double centerX = r.x() + radiusX; // Центр дуги по X
+		double centerY = r.y() + radiusY; // Центр дуги по Y
 
+		// Угол старта и длина дуги в радианах
+		double startAngleRad = aStart * M_PI / 180.0 / 16.0; // aStart в 1/16 градуса
+		double endAngleRad = (aStart + aLength) * M_PI / 180.0 / 16.0;
 
+		// Координаты начальной точки дуги
+		double xStart = centerX + radiusX * cos(-startAngleRad);
+		double yStart = centerY + radiusY * sin(-startAngleRad);
+
+		// Координаты конечной точки дуги
+		double xEnd = centerX + radiusX * cos(-endAngleRad);
+		double yEnd = centerY + radiusY * sin(-endAngleRad);
+
+		// Рисование прямой линии между начальной и конечной точками
+		painter.drawLine(QPointF(xStart, yStart), QPointF(xEnd, yEnd));
+	}
 
 	inline void draw(
 		QPainter& painter,
@@ -140,32 +168,44 @@ namespace DrawMcuPwm
 
 		const double maxSpanAngle = settings.getMcuPwmCycleDegrees();
 
-		for (uint64_t flash = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; flash++)
+		const uint32_t rgbLedCount = settings.getRgbLedCount();
+
+		uint64_t bitsPerFrame = 0;
+
+		for (uint64_t pulseIndex = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; pulseIndex++)
 		{
-			const int offset = flash % 4;
-			for (int color = 0; color < 3; color++)
+			for (int colorIndex = 0; colorIndex < settings.colorCount; colorIndex++)
 			{
-				painter.setPen(rgbColors[color]);
+				if(settings.colorCount == 1)
+					painter.setPen(QColor(255,255,255));
+				else
+					painter.setPen(rgbColors[colorIndex]);
 
-				for (int i = offset; i < settings.getRgbLedCount(); i += 4)
+				const double radius2 = ledStartRadius + colorIndex * settings.ledStepPxBetweenRGB;
+
+				for (int i = 0; i < rgbLedCount; i++)
 				{
-					const double radius2 = ledStartRadius + ledStepPx * i;
+					if (i % settings.getRealCountChannelsStrobe() != pulseIndex % settings.getRealCountChannelsStrobe())
+						continue;
 
-
-					double radius3 = radius2 + color * settings.ledStepPxBetweenRGB;
+					double radius3 = radius2 + ledStepPx * rgbLedCount * pow((double)(rgbLedCount-i-1) / rgbLedCount, 0.8);
 					uint8_t brightness = rand() % 256;
+
+					bitsPerFrame += (1ULL << settings.colorBitDepth);
+
 					double spanAngle = brightness / 256.0 * maxSpanAngle;
 					QRectF r(
 						fanCenter - radius3,
 						fanCenter - radius3,
 						radius3 * 2,
 						radius3 * 2);
-					painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
+					//painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
+					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
 				}
 			}
 			globalCurrentAngleDegrees += maxSpanAngle;
 		}
 
-		std::cout << "Async paint time=" << t.elapsed() << std::endl;
+		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = "<< bitsPerFrame<< std::endl;
 	}
 };
