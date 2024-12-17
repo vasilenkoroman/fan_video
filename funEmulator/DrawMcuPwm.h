@@ -1,7 +1,13 @@
 #pragma once
+
 #include <stdint.h>
+#include <iostream>
+
 #include <QPainter>
+#include <QElapsedTimer>
+
 #include "DrawBase.h"
+
 namespace DrawMcuPwm
 {
 	inline void draw(
@@ -11,6 +17,9 @@ namespace DrawMcuPwm
 		double fanCenter,
 		double fanRadiusPx)
 	{
+		QElapsedTimer t;
+		t.restart();
+
 		const double maxGlobalAngleThisRepaint = (counterFrames + 1) * fanAngleSpeedDegreesEveryFrame;
 		double globalCurrentAngleDegrees = counterFrames * fanAngleSpeedDegreesEveryFrame;
 
@@ -78,11 +87,10 @@ namespace DrawMcuPwm
 
 		for (uint64_t flash = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; flash++)
 		{
-			for (int i = 0; i < RGB_LED_COUNT; i++)
+			const int offset = flash % 4;
+			for (int i = offset; i < RGB_LED_COUNT; i += 4)
 			{
-				if (flash % 4 != i % 4)
-					continue;
-				double radius2 = ledStartRadius + ledStepPx * i;
+				const double radius2 = ledStartRadius + ledStepPx * i;
 				for (int color = 0; color < 3; color++)
 				{
 					double radius3 = radius2 + color * ledStepPxBetweenRGB;
@@ -99,5 +107,7 @@ namespace DrawMcuPwm
 			}
 			globalCurrentAngleDegrees += maxSpanAngle;
 		}
+
+		std::cout << "Async paint time=" << t.elapsed() << std::endl;
 	}
 };
