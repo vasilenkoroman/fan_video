@@ -2,13 +2,8 @@
 
 #include <QPainter>
 
-double globalCurrentAngleDegrees = 0;
-
 #include "DrawMcuPwm.h"
 #include "DrawWs2812.h"
-
-/* Every frame, every 1 fps, every repaint counterFrames++. */
-uint64_t counterFrames = 0;
 
 QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget* parent)
   : QMainWindow(parent)
@@ -28,6 +23,11 @@ QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget* parent)
 
 enum UI_TABS { UI_TAB_MCU_PWM, UI_TAB_WS2118 };
 UI_TABS uiTab = UI_TAB_MCU_PWM;
+
+/* Every frame, every 1 fps, every repaint counterFrames++.
+must be set 0 every settings change*/
+uint64_t counterFrames = 0;
+
 void QtFunEmulatorApplication::paintSomethingToBuffer()
 {
   // Draw to buffer allocated in QImage
@@ -42,15 +42,11 @@ void QtFunEmulatorApplication::paintSomethingToBuffer()
   painter.setPen(Qt::white);
   painter.drawEllipse(QPointF(fanCenterX, fanCenterY), fanRadiusPx, fanRadiusPx);//FAN canvas
 
-  double maxGlobalAngleThisRepaint = counterFrames * fanAngleSpeedDegreesEveryFrame;
 
-  for (uint64_t flash = 0; flash < 999999 && globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; flash++)
-  {
-    if(uiTab == UI_TAB_MCU_PWM)
-      DrawMcuPwm::draw(painter, flash, &globalCurrentAngleDegrees);
-    else if(uiTab == UI_TAB_WS2118)
-      DrawWs2812::draw();
-  }
+  if (uiTab == UI_TAB_MCU_PWM)
+    DrawMcuPwm::draw(painter, counterFrames);
+  else if (uiTab == UI_TAB_WS2118)
+    DrawWs2812::draw();
 
   // Repaint main windows to display new buffer.
   repaint();
