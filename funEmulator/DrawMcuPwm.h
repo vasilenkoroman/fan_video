@@ -21,7 +21,6 @@ namespace DrawMcuPwm
 		t.restart();
 
 		const double maxGlobalAngleThisRepaint = (counterFrames + 1) * fanAngleSpeedDegreesEveryFrame;
-		double globalCurrentAngleDegrees = counterFrames * fanAngleSpeedDegreesEveryFrame;
 
 		const double ledStepPxBetweenRGB = 1;
 		/**
@@ -85,27 +84,30 @@ namespace DrawMcuPwm
 
 		const double maxSpanAngle = pwmCycleDegrees;
 
-		for (uint64_t flash = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; flash++)
+		for (int color = 0; color < 3; color++)
 		{
-			const int offset = flash % 4;
-			for (int i = offset; i < RGB_LED_COUNT; i += 4)
+			painter.setPen(rgbColors[color]);
+			double globalCurrentAngleDegrees = counterFrames * fanAngleSpeedDegreesEveryFrame;
+			for (uint64_t flash = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; flash++)
 			{
-				const double radius2 = ledStartRadius + ledStepPx * i;
-				for (int color = 0; color < 3; color++)
+				const int offset = flash % 4;
+				for (int i = offset; i < RGB_LED_COUNT; i += 4)
 				{
-					double radius3 = radius2 + color * ledStepPxBetweenRGB;
-					painter.setPen(rgbColors[color]);
-					uint8_t brightness = rand() % 256;
-					double spanAngle = brightness / 256.0 * maxSpanAngle;
-					QRectF r(
-						fanCenter - radius3,
-						fanCenter - radius3,
-						radius3 * 2,
-						radius3 * 2);
-					painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
+					const double radius2 = ledStartRadius + ledStepPx * i;
+					{
+						double radius3 = radius2 + color * ledStepPxBetweenRGB;
+						uint8_t brightness = rand() % 256;
+						double spanAngle = brightness / 256.0 * maxSpanAngle;
+						QRectF r(
+							fanCenter - radius3,
+							fanCenter - radius3,
+							radius3 * 2,
+							radius3 * 2);
+						painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
+					}
 				}
+				globalCurrentAngleDegrees += maxSpanAngle;
 			}
-			globalCurrentAngleDegrees += maxSpanAngle;
 		}
 
 		std::cout << "Async paint time=" << t.elapsed() << std::endl;
