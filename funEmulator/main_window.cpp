@@ -42,6 +42,7 @@ void QtFunEmulatorApplication::paintSomethingToBuffer()
   painter.setPen(Qt::white);
   painter.drawEllipse(QPointF(fanCenterX, fanCenterY), fanRadiusPx, fanRadiusPx);//FAN canvas
 
+  painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
   if (uiTab == UI_TAB_MCU_PWM)
     DrawMcuPwm::draw(painter, counterFrames);
