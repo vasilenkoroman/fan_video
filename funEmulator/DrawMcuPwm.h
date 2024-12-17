@@ -104,7 +104,7 @@ namespace DrawMcuPwm
 		};
 
 		/*Type of PWM modulation.*/
-		const PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
+		PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
 
 		uint32_t colorBitDepth = 8;//1 to 16
 
@@ -113,7 +113,7 @@ namespace DrawMcuPwm
 			For 8 bit color channel center align, getMcuPwmCycleLengthTicks = 512.
 			Better be const in MCU and set on compilation firmware, cut can be set dynamic.
 		*/
-		uint32_t getMcuPwmCycleLengthTicks()
+		uint32_t getMcuPwmCycleLengthTicks() const
 		{
 			if (pwmAlign == PWM_CENTER_ALIGN)
 				return 2 << colorBitDepth;
@@ -129,12 +129,12 @@ namespace DrawMcuPwm
 			MCU_PWM_TICK_HZ = 24000000 / 2 = 12000000 hz
 			Better be const in MCU and set on compilation firmware, cut can be set dynamic.
 			*/
-		double getMcuPwmTickHz()
+		double getMcuPwmTickHz() const
 		{
 			return (double)this->cpuFrequencyHz / this->cpuFrequencyDivider;
 		}
 
-		double getMcuPwmTickUSec()
+		double getMcuPwmTickUSec() const
 		{
 			return 1.0 / this->getMcuPwmTickHz() * 1000000.0;
 		}
@@ -142,12 +142,12 @@ namespace DrawMcuPwm
 		/* MCU PWM one cycle frequency in hz.
 			For example if MCU_PWM_TICK_HZ == 12 MHz, getMcuPwmCycleLengthTicks = 512
 			getMcuPwmCycleHz = 12000000 / 512 = 23437,5 hz*/
-		double getMcuPwmCycleHz()
+		double getMcuPwmCycleHz() const
 		{
 			return (double)getMcuPwmTickHz() / this->getMcuPwmCycleLengthTicks();
 		}
 
-		double getMcuPwmCycleUSec()
+		double getMcuPwmCycleUSec() const
 		{
 			return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
 		}
