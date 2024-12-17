@@ -12,34 +12,26 @@ QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget *parent)
     connect(&m_timer, &QTimer::timeout,
         [this]()
         {
-            // Draw to buffer allocated in QImage
-            QPainter painter(&m_drawBuffer);
-            QRectF rectangle(
-                0,
-                40,
-                width(),
-                height());
-            int startAngle = 30 * 16;
-            int spanAngle = 120 * 16;
-            painter.drawArc(rectangle, startAngle, spanAngle);
-
-            // Repaint main windows to display new buffer.
-            repaint();
+            paintSomethingToBuffer();
+            repaint(); //< Repaint main windows to display new buffer.
         });
 
-    // QImage format is 16-bit per component, 64 bit per pixel.
-    m_drawBuffer = QImage(width(), height(), QImage::Format_RGBA64_Premultiplied);
-
-    m_timer.start(1000 / kFps);
+    connect(ui.spinBoxFps, &QSpinBox::valueChanged, this, [this](){ restartTimer();});
+    restartTimer();
 }
 
-void QtFunEmulatorApplication::paintEvent(QPaintEvent* event)
+void QtFunEmulatorApplication::paintSomethingToBuffer()
 {
-    base_type::paintEvent(event);
-    QPainter painter(this);
-    // Draw buffer to the mainWindow
-    painter.drawImage(QRect(0, 0, width(), height()), m_drawBuffer);
+    // Draw to buffer allocated in QImage
+    QImage* buffer = ui.bufferDataWidget->buffer();
+    QPainter painter(buffer);
+    int startAngle = 0; //< Value in 1/16th of a degree.
+    int spanAngle = -16 * 180; //< Value in 1/16th of a degree.
+    painter.drawArc(buffer->rect(), startAngle, spanAngle);
 }
 
-QtFunEmulatorApplication::~QtFunEmulatorApplication()
-{}
+void QtFunEmulatorApplication::restartTimer()
+{
+    m_timer.stop();
+    m_timer.start(1000 / ui.spinBoxFps->value());
+}
