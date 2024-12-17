@@ -17,9 +17,10 @@ public:
         setMinimumSize(300, 200);
     }
 
-    QImage* buffer()
+    void setBuffer(QImage image)
     {
-        return &m_drawBuffer;
+        m_drawBuffer = std::move(image);
+        repaint();
     }
 
 protected:

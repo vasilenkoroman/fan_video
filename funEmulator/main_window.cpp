@@ -5,17 +5,14 @@
 #include "DrawMcuPwm.h"
 #include "DrawWs2812.h"
 
+const int kThreads = 8;
+
 QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget* parent)
   : QMainWindow(parent)
 {
   ui.setupUi(this);
 
-  connect(&m_timer, &QTimer::timeout,
-    [this]()
-    {
-      paintSomethingToBuffer();
-      repaint(); //< Repaint main windows to display new buffer.
-    });
+  connect(&m_timer, &QTimer::timeout, [this]() { paintFan(); });
 
   connect(ui.spinBoxFps, &QSpinBox::valueChanged, this, [this]() { restartTimer(); });
   restartTimer();
@@ -24,37 +21,57 @@ QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget* parent)
 enum UI_TABS { UI_TAB_MCU_PWM, UI_TAB_WS2118 };
 UI_TABS uiTab = UI_TAB_MCU_PWM;
 
+struct DrawContext
+{
+    QSize size;
+    int fps = 0;
+    uint64_t frameNumber = 0;
+};
+
 /* Every frame, every 1 fps, every repaint counterFrames++.
 must be set 0 every settings change*/
-uint64_t counterFrames = 0;
-
-void QtFunEmulatorApplication::paintSomethingToBuffer()
+QImage drawAsync(const DrawContext& context)
 {
-  // Draw to buffer allocated in QImage
-  QImage* buffer = ui.bufferDataWidget->buffer();
-  QPainter painter(buffer);
+    // Draw to buffer allocated in QImage
+    QImage buffer(context.size.width(), context.size.height(), QImage::Format_RGBA64_Premultiplied);
+    QPainter painter(&buffer);
 
-  QRectF rectAll(0, 0, width(), height());
-  painter.setBrush(QBrush(QColor(0, 0, 0)));
-  painter.drawRect(rectAll);//Fill all black
-  painter.setBrush(QBrush(QColor(0, 0, 0, 0)));//remove brush
+    QRectF rectAll(0, 0, context.size.width(), context.size.height());
+    painter.setBrush(QBrush(QColor(0, 0, 0)));
+    painter.drawRect(rectAll);//Fill all black
+    painter.setBrush(QBrush(QColor(0, 0, 0, 0)));//remove brush
 
-  painter.setPen(Qt::white);
+    painter.setPen(Qt::white);
 
-  const int fanCenter = buffer->width() / 2;
-  const double fanRadiusPx  = fanCenter * 0.99;
-  painter.drawEllipse(QPointF(fanCenter, fanCenter), fanRadiusPx, fanRadiusPx);//FAN canvas
+    const int fanCenter = buffer.width() / 2;
+    const double fanRadiusPx = fanCenter * 0.99;
+    painter.drawEllipse(QPointF(fanCenter, fanCenter), fanRadiusPx, fanRadiusPx);//FAN canvas
 
-  painter.setCompositionMode(QPainter::CompositionMode_Plus);
+    painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
-  if (uiTab == UI_TAB_MCU_PWM)
-    DrawMcuPwm::draw(painter, ui.spinBoxFps->value(), counterFrames, fanCenter, fanRadiusPx);
-  else if (uiTab == UI_TAB_WS2118)
-    DrawWs2812::draw();
+    if (uiTab == UI_TAB_MCU_PWM)
+        DrawMcuPwm::draw(painter, context.fps, context.frameNumber, fanCenter, fanRadiusPx);
+    else if (uiTab == UI_TAB_WS2118)
+        DrawWs2812::draw();
 
-  // Repaint main windows to display new buffer.
-  repaint();
-  counterFrames++;
+    return buffer;
+}
+
+void QtFunEmulatorApplication::paintFan()
+{
+    DrawContext context {
+        ui.bufferDataWidget->size(),
+        ui.spinBoxFps->value(),
+        m_frameCounter++};
+    m_asyncDrawTask.push_back(std::async(
+        std::launch::async, [context] { return drawAsync(context); }));
+
+    while (m_asyncDrawTask.size() >= kThreads)
+    {
+        QImage image = m_asyncDrawTask.front().get();
+        m_asyncDrawTask.pop_front();
+        ui.bufferDataWidget->setBuffer(std::move(image));
+    }
 }
 
 void QtFunEmulatorApplication::restartTimer()
