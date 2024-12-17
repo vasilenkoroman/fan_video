@@ -130,7 +130,249 @@
            </property>
           </widget>
          </item>
-        </layout>
+					<item row="4" column="0">
+						<widget class="QLabel" name="label_pwmAlign">
+							<property name="text">
+								<string>pwmAlign (Select left or center):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="4" column="1">
+						<widget class="QComboBox" name="comboBoxPwmAlign">
+							<item>
+								<property name="text">
+									<string>Left Align</string>
+								</property>
+							</item>
+							<item>
+								<property name="text">
+									<string>Center Align</string>
+								</property>
+							</item>
+						</widget>
+					</item>
+
+					<item row="5" column="0">
+						<widget class="QLabel" name="label_colorBitDepth">
+							<property name="text">
+								<string>colorBitDepth (Input from 1 to 16):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="5" column="1">
+						<widget class="QSpinBox" name="spinBoxColorBitDepth">
+							<property name="minimum">
+								<number>1</number>
+							</property>
+							<property name="maximum">
+								<number>16</number>
+							</property>
+							<property name="value">
+								<number>8</number>
+							</property>
+						</widget>
+					</item>
+
+					<item row="6" column="0">
+						<widget class="QLabel" name="label_getMcuPwmCycleLengthTicks">
+							<property name="text">
+								<string>getMcuPwmCycleLengthTicks (Read-only):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="6" column="1">
+						<widget class="QLineEdit" name="lineEditCycleLengthTicks">
+							<property name="readOnly">
+								<bool>true</bool>
+							</property>
+						</widget>
+					</item>
+
+					<item row="7" column="0">
+						<widget class="QLabel" name="label_cpuFrequencyHz">
+							<property name="text">
+								<string>cpuFrequencyHz (Input 1 to 144 MHz):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="7" column="1">
+						<widget class="QSpinBox" name="spinBoxCpuFrequencyHz">
+							<property name="minimum">
+								<number>1</number>
+							</property>
+							<property name="maximum">
+								<number>144</number>
+							</property>
+							<property name="suffix">
+								<string> MHz</string>
+							</property>
+							<property name="value">
+								<number>48</number>
+							</property>
+						</widget>
+					</item>
+
+					<item row="8" column="0">
+						<widget class="QLabel" name="label_cpuFrequencyDivider">
+							<property name="text">
+								<string>cpuFrequencyDivider (Input 2 to 256):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="8" column="1">
+						<widget class="QSpinBox" name="spinBoxCpuFrequencyDivider">
+							<property name="minimum">
+								<number>2</number>
+							</property>
+							<property name="maximum">
+								<number>256</number>
+							</property>
+							<property name="value">
+								<number>2</number>
+							</property>
+						</widget>
+					</item>
+
+					<item row="9" column="0">
+						<widget class="QLabel" name="label_pwmTickHz">
+							<property name="text">
+								<string>getMcuPwmTickHz (Read-only):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="9" column="1">
+						<widget class="QLineEdit" name="lineEditPwmTickHz">
+							<property name="readOnly">
+								<bool>true</bool>
+							</property>
+						</widget>
+					</item>
+
+					<item row="10" column="0">
+						<widget class="QLabel" name="label_pwmTickUSec">
+							<property name="text">
+								<string>getMcuPwmTickUSec (Read-only):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="10" column="1">
+						<widget class="QLineEdit" name="lineEditPwmTickUSec">
+							<property name="readOnly">
+								<bool>true</bool>
+							</property>
+						</widget>
+					</item>
+
+					<item row="11" column="0">
+						<widget class="QLabel" name="label_pwmCycleHz">
+							<property name="text">
+								<string>getMcuPwmCycleHz (Read-only):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="11" column="1">
+						<widget class="QLineEdit" name="lineEditPwmCycleHz">
+							<property name="readOnly">
+								<bool>true</bool>
+							</property>
+						</widget>
+					</item>
+
+					<item row="12" column="0">
+						<widget class="QLabel" name="label_pwmCycleUSec">
+							<property name="text">
+								<string>getMcuPwmCycleUSec (Read-only):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="12" column="1">
+						<widget class="QLineEdit" name="lineEditPwmCycleUSec">
+							<property name="readOnly">
+								<bool>true</bool>
+							</property>
+						</widget>
+					</item>
+
+					<item row="13" column="0">
+						<widget class="QLabel" name="label_pwmHwOutputs">
+							<property name="text">
+								<string>mcuPwmHwOutputs (Input 1 to 64):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="13" column="1">
+						<widget class="QSpinBox" name="spinBoxPwmHwOutputs">
+							<property name="minimum">
+								<number>1</number>
+							</property>
+							<property name="maximum">
+								<number>64</number>
+							</property>
+							<property name="value">
+								<number>16</number>
+							</property>
+						</widget>
+					</item>
+
+					<item row="14" column="0">
+						<widget class="QLabel" name="label_channelsStrobe">
+							<property name="text">
+								<string>mcuPwmCountChannelsStrobe (0 to max - 1):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="14" column="1">
+						<widget class="QSpinBox" name="spinBoxChannelsStrobe">
+							<property name="minimum">
+								<number>0</number>
+							</property>
+							<property name="maximum">
+								<number>15</number>
+								<!-- Зависит от mcuPwmHwOutputs -->
+							</property>
+						</widget>
+					</item>
+
+					<item row="15" column="0">
+						<widget class="QLabel" name="label_colorCount">
+							<property name="text">
+								<string>colorCount (Input 1 to 3):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="15" column="1">
+						<widget class="QSpinBox" name="spinBoxColorCount">
+							<property name="minimum">
+								<number>1</number>
+							</property>
+							<property name="maximum">
+								<number>3</number>
+							</property>
+						</widget>
+					</item>
+
+					<item row="16" column="0">
+						<widget class="QLabel" name="label_ledStepPx">
+							<property name="text">
+								<string>ledStepPxBetweenRGB (0 to 9, step 0.1):</string>
+							</property>
+						</widget>
+					</item>
+					<item row="16" column="1">
+						<widget class="QDoubleSpinBox" name="doubleSpinBoxLedStepPx">
+							<property name="minimum">
+								<double>0.0</double>
+							</property>
+							<property name="maximum">
+								<double>9.0</double>
+							</property>
+							<property name="singleStep">
+								<double>0.1</double>
+							</property>
+						</widget>
+					</item>
+
+				</layout>
        </item>
        <item>
         <spacer name="verticalSpacer">

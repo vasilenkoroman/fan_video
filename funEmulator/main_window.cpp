@@ -35,12 +35,15 @@ struct DrawContext
     QSize size;
     int fps = 0;
     uint64_t frameNumber = 0;
+    DrawMcuPwm::McuPwmSettings settingsPwm;
+
 };
 
 /* Every frame, every 1 fps, every repaint counterFrames++.
 must be set 0 every settings change*/
 QImage drawAsync(const DrawContext& context)
 {
+
 #ifdef USE_OPENGL_PAINTER
     QOpenGLContext glContext;
     glContext.create();
@@ -86,7 +89,7 @@ QImage drawAsync(const DrawContext& context)
     painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
     if (uiTab == UI_TAB_MCU_PWM)
-        DrawMcuPwm::draw(painter, /*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
+        DrawMcuPwm::draw(painter, context.settingsPwm,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
     else if (uiTab == UI_TAB_WS2118)
         DrawWs2812::draw();
 
@@ -103,10 +106,24 @@ QImage drawAsync(const DrawContext& context)
 
 void QtFunEmulatorApplication::paintFan()
 {
+  DrawMcuPwm::McuPwmSettings settingsPwm;
+  settingsPwm.colorBitDepth = ui.spinBoxColorBitDepth->value();
+  settingsPwm.colorCount = ui.spinBoxColorCount->value();
+  settingsPwm.cpuFrequencyDivider = ui.spinBoxCpuFrequencyDivider->value();
+  settingsPwm.cpuFrequencyHz = 1000000 * ui.spinBoxCpuFrequencyHz->value();
+  settingsPwm.ledStepPxBetweenRGB = ui.doubleSpinBoxLedStepPx->value();
+  settingsPwm.mcuPwmCountChannelsStrobe = ui.spinBoxChannelsStrobe->value();
+  settingsPwm.mcuPwmHwOutputs = ui.spinBoxPwmHwOutputs->value();
+  //settingsPwm.pwmAlign = ui.comboBoxPwmAlign->value();
+
+
+
     DrawContext context {
         ui.bufferDataWidget->size(),
         ui.spinBoxFps->value(),
-        m_frameCounter++};
+        m_frameCounter++,
+        settingsPwm
+    };
 
 #ifdef USE_OPENGL_PAINTER
     // Multi-thread painting is not implemented for openGL version yet.

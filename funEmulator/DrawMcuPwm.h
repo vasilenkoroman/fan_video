@@ -10,6 +10,80 @@
 
 namespace DrawMcuPwm
 {
+	//struct McuPwmSettings
+	//{
+	//	enum PWM_ALIGNS
+	//	{
+	//		PWM_LEFT_ALIGN,
+	//		PWM_CENTER_ALIGN
+	//	};
+
+	//	const PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
+
+	//	uint32_t colorBitDepth = 8;//1 to 16
+	//	uint32_t getMcuPwmCycleLengthTicks()
+	//	{
+	//		if (pwmAlign == PWM_CENTER_ALIGN)
+	//			return 2 << colorBitDepth;
+	//		return 1 << colorBitDepth;
+	//	}
+
+	//	uint32_t cpuFrequencyHz = 48 * 1000 * 1000;
+
+	//	uint32_t cpuFrequencyDivider = 2;// From 2 to 256
+	//	double getMcuPwmTickHz()
+	//	{
+	//		return (double)this->cpuFrequencyHz / this->cpuFrequencyDivider;
+	//	}
+
+	//	double getMcuPwmTickUSec()
+	//	{
+	//		return 1.0 / this->getMcuPwmTickHz() * 1000000.0;
+	//	}
+	//	double getMcuPwmCycleHz()
+	//	{
+	//		return (double)getMcuPwmTickHz() / this->getMcuPwmCycleLengthTicks();
+	//	}
+
+	//	double getMcuPwmCycleUSec()
+	//	{
+	//		return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
+	//	}
+	//	double getMcuPwmCycleDegrees()
+	//	{
+	//		return fanAngleSpeedDegreesEverySec / this->getMcuPwmCycleHz();
+	//	}
+	//	uint8_t mcuPwmHwOutputs = 16;
+	//	uint8_t mcuPwmCountChannelsStrobe = 8;
+
+	//	uint8_t mcuPwmCountChannelsLed()
+	//	{
+	//		return this->mcuPwmHwOutputs - this->mcuPwmCountChannelsStrobe;//12
+	//	}
+
+	//	uint8_t getRealCountChannelsStrobe()
+	//	{
+	//		return this->mcuPwmCountChannelsStrobe ? this->mcuPwmCountChannelsStrobe : 1;
+	//	}
+	//	uint32_t colorCount = 3;
+
+	//	uint32_t getRgbLedCount()
+	//	{
+	//		return this->mcuPwmCountChannelsLed() * this->getRealCountChannelsStrobe() / colorCount;
+	//	}
+
+	//	const double ledStepPxBetweenRGB = 3;
+	//};
+
+
+
+
+
+
+
+
+
+
 	struct McuPwmSettings
 	{
 		/*Type of PWM modulation.*/
@@ -119,7 +193,7 @@ namespace DrawMcuPwm
 			return this->mcuPwmCountChannelsLed() * this->getRealCountChannelsStrobe() / colorCount;
 		}
 
-		const double ledStepPxBetweenRGB = 3;
+		double ledStepPxBetweenRGB = 3;
 	};
 
 	inline void drawLineFromArc(QPainter& painter, QRectF r, int aStart, int aLength) {//GPT code
@@ -147,6 +221,7 @@ namespace DrawMcuPwm
 
 	inline void draw(
 		QPainter& painter,
+		DrawMcuPwm::McuPwmSettings settings,
 		//McuPwmSettings& settings,
 		//int fps,
 		uint64_t indexOfThisFrame,
@@ -156,7 +231,7 @@ namespace DrawMcuPwm
 		QElapsedTimer t;
 		t.restart();
 
-		McuPwmSettings settings;
+		//McuPwmSettings settings;
 
 
 		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * fanAngleSpeedDegreesEveryFrame;
