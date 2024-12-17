@@ -86,7 +86,7 @@ QImage drawAsync(const DrawContext& context)
     painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
     if (uiTab == UI_TAB_MCU_PWM)
-        DrawMcuPwm::draw(painter, context.fps, context.frameNumber, fanCenter, fanRadiusPx);
+        DrawMcuPwm::draw(painter, /*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
     else if (uiTab == UI_TAB_WS2118)
         DrawWs2812::draw();
 
