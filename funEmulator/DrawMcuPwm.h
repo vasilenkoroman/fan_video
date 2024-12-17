@@ -196,26 +196,20 @@ namespace DrawMcuPwm
 		double ledStepPxBetweenRGB = 3;
 	};
 
-	inline void drawLineFromArc(QPainter& painter, QRectF r, int aStart, int aLength) {//GPT code
-		// Радиус дуги (используем меньшую сторону для корректности)
-		double radiusX = r.width() / 2.0;
-		double radiusY = r.height() / 2.0;
-		double centerX = r.x() + radiusX; // Центр дуги по X
-		double centerY = r.y() + radiusY; // Центр дуги по Y
+	inline void drawLineFromArc(QPainter& painter, QRectF r, double aStart, double aLength)
+	{
+		double radius = r.width() / 2.0;
+		double center = r.x() + radius;
 
-		// Угол старта и длина дуги в радианах
-		double startAngleRad = aStart * M_PI / 180.0 / 16.0; // aStart в 1/16 градуса
-		double endAngleRad = (aStart + aLength) * M_PI / 180.0 / 16.0;
+		double startAngleRad = aStart * M_PI / 180.0;
+		double endAngleRad = (aStart + aLength) * M_PI / 180.0;
 
-		// Координаты начальной точки дуги
-		double xStart = centerX + radiusX * cos(-startAngleRad);
-		double yStart = centerY + radiusY * sin(-startAngleRad);
+		double xStart = center + radius * cos(-startAngleRad);
+		double yStart = center + radius * sin(-startAngleRad);
 
-		// Координаты конечной точки дуги
-		double xEnd = centerX + radiusX * cos(-endAngleRad);
-		double yEnd = centerY + radiusY * sin(-endAngleRad);
+		double xEnd = center + radius * cos(-endAngleRad);
+		double yEnd = center + radius * sin(-endAngleRad);
 
-		// Рисование прямой линии между начальной и конечной точками
 		painter.drawLine(QPointF(xStart, yStart), QPointF(xEnd, yEnd));
 	}
 
@@ -258,11 +252,9 @@ namespace DrawMcuPwm
 
 				const double radius2 = ledStartRadius + colorIndex * settings.ledStepPxBetweenRGB;
 
-				for (int i = 0; i < rgbLedCount; i++)
+				const int offset = pulseIndex % settings.getRealCountChannelsStrobe();
+				for (int i = offset; i < rgbLedCount; i+= settings.getRealCountChannelsStrobe())
 				{
-					if (i % settings.getRealCountChannelsStrobe() != pulseIndex % settings.getRealCountChannelsStrobe())
-						continue;
-
 					double radius3 = radius2 + ledStepPx * rgbLedCount * pow((double)(rgbLedCount-i-1) / rgbLedCount, 0.8);
 					uint8_t brightness = rand() % 256;
 
@@ -275,7 +267,7 @@ namespace DrawMcuPwm
 						radius3 * 2,
 						radius3 * 2);
 					//painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
-					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
+					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2), spanAngle);
 				}
 			}
 			globalCurrentAngleDegrees += maxSpanAngle;
