@@ -59,7 +59,14 @@ QtFunEmulatorApplication::QtFunEmulatorApplication(QWidget* parent)
 }
 
 enum UI_TABS { UI_TAB_MCU_PWM, UI_TAB_WS2118 };
-UI_TABS uiTab = UI_TAB_MCU_PWM;
+
+struct GlobalSettings
+{
+  UI_TABS uiTab = UI_TAB_WS2118;
+
+};
+
+GlobalSettings globalSettings;
 
 struct DrawContext
 {
@@ -120,9 +127,10 @@ QImage drawAsync(const DrawContext& context)
 
     painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
-    //if (uiTab == UI_TAB_MCU_PWM)
-    //    DrawMcuPwm::draw(painter, context.settingsPwm,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
-   // else if (uiTab == UI_TAB_WS2118)
+    //TODO need tabs in UI to switch between methods
+    if (globalSettings.uiTab == UI_TAB_MCU_PWM)
+        DrawMcuPwm::draw(painter, context.settingsPwm,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
+    else if (globalSettings.uiTab == UI_TAB_WS2118)
         DrawWs2812::draw(painter, context.settingsWs2812,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
 
     painter.end();

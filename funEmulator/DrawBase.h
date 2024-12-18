@@ -6,7 +6,7 @@
 inline  const QColor rgbColors[3] = { QColor(255,0,0),QColor(0,255,0),QColor(0,0,255) };
 
 
-inline uint8_t fanBladesCount = 1;
+inline uint8_t fanBladesCount = 8;//TODO fanBladesCount not work in UI
 
 inline double simulationFps = 24;
 

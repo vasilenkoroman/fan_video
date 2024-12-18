@@ -15,7 +15,7 @@ namespace DrawWs2812
 		inline static const double timeoutSecTransfer24Bit = 30.0 / 1000.0 / 1000.0;
 		inline static const double timeoutSecTransferEnd = 50.0 / 1000.0 / 1000.0;
 
-		int rgbLedCount = 16;
+		int rgbLedCount = 8;
 
 		double getTimeoutSecTransferAll()
 		{
@@ -27,7 +27,6 @@ namespace DrawWs2812
 			return secondOneCircle / this->getTimeoutSecTransferAll();
 		}
 	};
-
 
 	inline void draw(
 		QPainter& painter,
@@ -42,7 +41,6 @@ namespace DrawWs2812
 		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * fanAngleSpeedDegreesEveryFrame;
 		double globalCurrentAngleDegrees = indexOfThisFrame * fanAngleSpeedDegreesEveryFrame;
 
-		//fanBladesCount = 10;
 		const uint32_t ledLineCount = settings.rgbLedCount * fanBladesCount;
 		const double ledStepPx = fanRadiusPx / ledLineCount;
 		const double ledStartRadius = ledStepPx / 2;
@@ -51,20 +49,15 @@ namespace DrawWs2812
 
 		const double maxSpanAngleDegrees = 360.0 / blinkCountEveryCircle;
 
-
-
 		uint64_t bitsPerFrameStatistic = 0;
-
-		for (uint64_t pulseIndex = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; pulseIndex++)
+		uint64_t pulseIndex = 0;
+		for (; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; pulseIndex++)
 		{
-			
-
 				for (int ledBlockIndex = 0; ledBlockIndex < ledLineCount; ledBlockIndex++)
 				{
 					double radius3 = ledStartRadius + ledStepPx * ledLineCount * pow((double)(ledLineCount - ledBlockIndex - 1) / ledLineCount, 0.8);
 
 					painter.setPen(QColor(rand() % 256, rand() % 256, rand() % 256));
-
 
 					double spanAngle = maxSpanAngleDegrees;
 					QRectF r(
@@ -76,13 +69,13 @@ namespace DrawWs2812
 					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2), spanAngle);
 
 					bitsPerFrameStatistic += 24;
-
 				}
 	
 			globalCurrentAngleDegrees += maxSpanAngleDegrees;
 		}
 
-		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = " << bitsPerFrameStatistic << std::endl;
+		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = " << bitsPerFrameStatistic << "; pulses = "<< pulseIndex
+			<< "; thisA"<< fanAngleSpeedDegreesEveryFrame 
+			<< "; ARes="<< blinkCountEveryCircle << std::endl;
 	}
 };
-
