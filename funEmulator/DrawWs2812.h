@@ -15,7 +15,7 @@ namespace DrawWs2812
 		inline static const double timeoutSecTransfer24Bit = 30.0 / 1000.0 / 1000.0;
 		inline static const double timeoutSecTransferEnd = 50.0 / 1000.0 / 1000.0;
 
-		int rgbLedCount = 8;
+		int rgbLedCount = 32;
 
 		double getTimeoutSecTransferAll()
 		{
@@ -25,6 +25,14 @@ namespace DrawWs2812
 		double calculateCircularResolutionTransferAll(double secondOneCircle)
 		{
 			return secondOneCircle / this->getTimeoutSecTransferAll();
+		}
+
+		uint64_t calculateDmaRamSizeBytes1Frame(uint64_t stripCount)
+		{
+			uint64_t oneStripeBits1frame = 40 + 24 * this->rgbLedCount;//232 bits if 8 leds in one strip
+			uint64_t oneStripeBytes1frame = oneStripeBits1frame;//232 bytes
+			uint64_t manyStripesBytes1frame = oneStripeBytes1frame * stripCount;//1856 bytes if 8 stripes
+			return manyStripesBytes1frame;
 		}
 	};
 

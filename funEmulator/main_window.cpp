@@ -63,6 +63,7 @@ enum UI_TABS { UI_TAB_MCU_PWM, UI_TAB_WS2118 };
 struct GlobalSettings
 {
   UI_TABS uiTab = UI_TAB_WS2118;
+  //UI_TABS uiTab = UI_TAB_MCU_PWM;
 
 };
 
