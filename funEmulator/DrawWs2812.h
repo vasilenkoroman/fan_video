@@ -9,7 +9,7 @@
 
 namespace DrawWs2812
 {
-	struct Ws2812Settings
+	struct Ws2812Settings: public CommonFanSettings
 	{
 		inline static const double timeoutSecTransfer1Bit = 1.25 / 1000.0 / 1000.0;
 		inline static const double timeoutSecTransfer24Bit = 30.0 / 1000.0 / 1000.0;
@@ -38,14 +38,14 @@ namespace DrawWs2812
 		QElapsedTimer t;
 		t.restart();
 
-		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * fanAngleSpeedDegreesEveryFrame;
-		double globalCurrentAngleDegrees = indexOfThisFrame * fanAngleSpeedDegreesEveryFrame;
+		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * settings.fanAngleSpeedDegreesEveryFrame();
+		double globalCurrentAngleDegrees = indexOfThisFrame * settings.fanAngleSpeedDegreesEveryFrame();
 
-		const uint32_t ledLineCount = settings.rgbLedCount * fanBladesCount;
+		const uint32_t ledLineCount = settings.rgbLedCount * settings.fanBladesCount;
 		const double ledStepPx = fanRadiusPx / ledLineCount;
 		const double ledStartRadius = ledStepPx / 2;
 
-		const double blinkCountEveryCircle = settings.calculateCircularResolutionTransferAll(1.0 / fanRps);
+		const double blinkCountEveryCircle = settings.calculateCircularResolutionTransferAll(1.0 / settings.fanRps);
 
 		const double maxSpanAngleDegrees = 360.0 / blinkCountEveryCircle;
 
@@ -70,12 +70,12 @@ namespace DrawWs2812
 
 					bitsPerFrameStatistic += 24;
 				}
-	
+
 			globalCurrentAngleDegrees += maxSpanAngleDegrees;
 		}
 
 		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = " << bitsPerFrameStatistic << "; pulses = "<< pulseIndex
-			<< "; thisA"<< fanAngleSpeedDegreesEveryFrame 
+			<< "; thisA"<< settings.fanAngleSpeedDegreesEveryFrame()
 			<< "; ARes="<< blinkCountEveryCircle << std::endl;
 	}
 };

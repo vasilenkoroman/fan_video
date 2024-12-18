@@ -150,6 +150,7 @@ QImage drawAsync(const DrawContext& context)
 
 void QtFunEmulatorApplication::loadSettingsToUi()
 {
+    ui.spinBoxBladeCount->setValue(m_settings.fanBladesCount);
     ui.spinBoxFps->setValue(m_settings.simulationFps);
     ui.spinBoxFanRps->setValue(m_settings.fanRps);
     ui.spinBoxColorBitDepth->setValue(m_settings.colorBitDepth);
@@ -175,6 +176,7 @@ void QtFunEmulatorApplication::updateReadOnlyUiControls()
 
 void QtFunEmulatorApplication::readSettingsFromUi()
 {
+    m_settings.fanBladesCount = ui.spinBoxBladeCount->value();
     m_settings.simulationFps = ui.spinBoxFps->value();
     m_settings.fanRps = ui.spinBoxFanRps->value();
     m_settings.colorBitDepth = ui.spinBoxColorBitDepth->value();
@@ -196,6 +198,7 @@ void QtFunEmulatorApplication::saveSettingsToFile()
 {
     QJsonObject jsonObj;
 
+    jsonObj["fanBladesCount"] = m_settings.fanBladesCount;
     jsonObj["simulationFps"] = m_settings.simulationFps;
     jsonObj["fanRps"] = m_settings.fanRps;
     jsonObj["colorBitDepth"] = (qint64) m_settings.colorBitDepth;
@@ -223,6 +226,7 @@ void QtFunEmulatorApplication::loadSettingsFromFile()
         if (!jsonDoc.isNull() && jsonDoc.isObject())
         {
             const auto jsonObj = jsonDoc.object();
+            m_settings.fanBladesCount = jsonObj["fanBladesCount"].toInt();
             m_settings.simulationFps = jsonObj["simulationFps"].toInt();
             m_settings.fanRps = jsonObj["fanRps"].toDouble();
             m_settings.colorBitDepth = jsonObj["colorBitDepth"].toInteger();

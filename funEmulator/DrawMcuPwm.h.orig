@@ -10,9 +10,86 @@
 
 namespace DrawMcuPwm
 {
+<<<<<<< HEAD
+=======
+	//struct McuPwmSettings
+	//{
+	//	enum PWM_ALIGNS
+	//	{
+	//		PWM_LEFT_ALIGN,
+	//		PWM_CENTER_ALIGN
+	//	};
 
-	struct McuPwmSettings: public CommonFanSettings
+	//	const PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
+
+	//	uint32_t colorBitDepth = 8;//1 to 16
+	//	uint32_t getMcuPwmCycleLengthTicks()
+	//	{
+	//		if (pwmAlign == PWM_CENTER_ALIGN)
+	//			return 2 << colorBitDepth;
+	//		return 1 << colorBitDepth;
+	//	}
+
+	//	uint32_t cpuFrequencyHz = 48 * 1000 * 1000;
+
+	//	uint32_t cpuFrequencyDivider = 2;// From 2 to 256
+	//	double getMcuPwmTickHz()
+	//	{
+	//		return (double)this->cpuFrequencyHz / this->cpuFrequencyDivider;
+	//	}
+
+	//	double getMcuPwmTickUSec()
+	//	{
+	//		return 1.0 / this->getMcuPwmTickHz() * 1000000.0;
+	//	}
+	//	double getMcuPwmCycleHz()
+	//	{
+	//		return (double)getMcuPwmTickHz() / this->getMcuPwmCycleLengthTicks();
+	//	}
+
+	//	double getMcuPwmCycleUSec()
+	//	{
+	//		return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
+	//	}
+	//	double getMcuPwmCycleDegrees()
+	//	{
+	//		return fanAngleSpeedDegreesEverySec / this->getMcuPwmCycleHz();
+	//	}
+	//	uint8_t mcuPwmHwOutputs = 16;
+	//	uint8_t mcuPwmCountChannelsStrobe = 8;
+
+	//	uint8_t mcuPwmCountChannelsLed()
+	//	{
+	//		return this->mcuPwmHwOutputs - this->mcuPwmCountChannelsStrobe;//12
+	//	}
+
+	//	uint8_t getRealCountChannelsStrobe()
+	//	{
+	//		return this->mcuPwmCountChannelsStrobe ? this->mcuPwmCountChannelsStrobe : 1;
+	//	}
+	//	uint32_t colorCount = 3;
+
+	//	uint32_t getRgbLedCount()
+	//	{
+	//		return this->mcuPwmCountChannelsLed() * this->getRealCountChannelsStrobe() / colorCount;
+	//	}
+
+	//	const double ledStepPxBetweenRGB = 3;
+	//};
+>>>>>>> d617ce2 (Move fps/fanRps to the settings)
+
+	struct McuPwmSettings
 	{
+		int simulationFps = 24;
+
+		/* How many rotates every second make fan blade.
+		For example 24.
+		Common big fan on floor make 1000 rpm or 16.7 rps,
+		if (simulationFps == fanRps) sync is OK
+		*/
+		double fanRps = 22.0;
+
+
 		/*Type of PWM modulation.*/
 		enum PWM_ALIGNS
 		{
@@ -79,6 +156,13 @@ namespace DrawMcuPwm
 			return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
 		}
 
+		/* How many degrees moved blade every 1 second.
+		   For example 24 * 360 = 8640°. */
+		double fanAngleSpeedDegreesEverySec() const
+		{
+			return fanRps * 360;
+		}
+
 		/* How many PWM cycles will be every cinema frame.
 			For example if getMcuPwmCycleHz == 23437,5hz and kFps == 24
 			MCU_PWM_CYCLE_EVERY_FRAME = 23437,5 / 24 = 976,5625*/
@@ -133,8 +217,16 @@ namespace DrawMcuPwm
 		QElapsedTimer t;
 		t.restart();
 
-		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * settings.fanAngleSpeedDegreesEveryFrame();
-		double globalCurrentAngleDegrees = indexOfThisFrame * settings.fanAngleSpeedDegreesEveryFrame();
+		//McuPwmSettings settings;
+
+		/* How many degrees moved blade every 1 simulation frame.
+		 * Used to calculate when begin new frame.
+		 * For example 24 * 360 = 8640°.
+		 */
+		const double fanAngleSpeedDegreesEveryFrame = settings.fanAngleSpeedDegreesEverySec() / settings.simulationFps;
+
+		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * fanAngleSpeedDegreesEveryFrame;
+		double globalCurrentAngleDegrees = indexOfThisFrame * fanAngleSpeedDegreesEveryFrame;
 
 
 		const double ledStepPx = fanRadiusPx / settings.getRgbLedCount();
@@ -172,7 +264,7 @@ namespace DrawMcuPwm
 						radius3 * 2);
 					//painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
 					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2), spanAngle);
-
+					
 					bitsPerFrameStatistic += settings.colorBitDepth;
 				}
 			}
