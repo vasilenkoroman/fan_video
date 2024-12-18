@@ -10,79 +10,6 @@
 
 namespace DrawMcuPwm
 {
-	//struct McuPwmSettings
-	//{
-	//	enum PWM_ALIGNS
-	//	{
-	//		PWM_LEFT_ALIGN,
-	//		PWM_CENTER_ALIGN
-	//	};
-
-	//	const PWM_ALIGNS pwmAlign = PWM_CENTER_ALIGN;
-
-	//	uint32_t colorBitDepth = 8;//1 to 16
-	//	uint32_t getMcuPwmCycleLengthTicks()
-	//	{
-	//		if (pwmAlign == PWM_CENTER_ALIGN)
-	//			return 2 << colorBitDepth;
-	//		return 1 << colorBitDepth;
-	//	}
-
-	//	uint32_t cpuFrequencyHz = 48 * 1000 * 1000;
-
-	//	uint32_t cpuFrequencyDivider = 2;// From 2 to 256
-	//	double getMcuPwmTickHz()
-	//	{
-	//		return (double)this->cpuFrequencyHz / this->cpuFrequencyDivider;
-	//	}
-
-	//	double getMcuPwmTickUSec()
-	//	{
-	//		return 1.0 / this->getMcuPwmTickHz() * 1000000.0;
-	//	}
-	//	double getMcuPwmCycleHz()
-	//	{
-	//		return (double)getMcuPwmTickHz() / this->getMcuPwmCycleLengthTicks();
-	//	}
-
-	//	double getMcuPwmCycleUSec()
-	//	{
-	//		return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
-	//	}
-	//	double getMcuPwmCycleDegrees()
-	//	{
-	//		return fanAngleSpeedDegreesEverySec / this->getMcuPwmCycleHz();
-	//	}
-	//	uint8_t mcuPwmHwOutputs = 16;
-	//	uint8_t mcuPwmCountChannelsStrobe = 8;
-
-	//	uint8_t mcuPwmCountChannelsLed()
-	//	{
-	//		return this->mcuPwmHwOutputs - this->mcuPwmCountChannelsStrobe;//12
-	//	}
-
-	//	uint8_t getRealCountChannelsStrobe()
-	//	{
-	//		return this->mcuPwmCountChannelsStrobe ? this->mcuPwmCountChannelsStrobe : 1;
-	//	}
-	//	uint32_t colorCount = 3;
-
-	//	uint32_t getRgbLedCount()
-	//	{
-	//		return this->mcuPwmCountChannelsLed() * this->getRealCountChannelsStrobe() / colorCount;
-	//	}
-
-	//	const double ledStepPxBetweenRGB = 3;
-	//};
-
-
-
-
-
-
-
-
-
 
 	struct McuPwmSettings
 	{
@@ -196,28 +123,9 @@ namespace DrawMcuPwm
 		double ledStepPxBetweenRGB = 3;
 	};
 
-	inline void drawLineFromArc(QPainter& painter, QRectF r, double aStart, double aLength)
-	{
-		double radius = r.width() / 2.0;
-		double center = r.x() + radius;
-
-		double startAngleRad = aStart * M_PI / 180.0;
-		double endAngleRad = (aStart + aLength) * M_PI / 180.0;
-
-		double xStart = center + radius * cos(-startAngleRad);
-		double yStart = center + radius * sin(-startAngleRad);
-
-		double xEnd = center + radius * cos(-endAngleRad);
-		double yEnd = center + radius * sin(-endAngleRad);
-
-		painter.drawLine(QPointF(xStart, yStart), QPointF(xEnd, yEnd));
-	}
-
 	inline void draw(
 		QPainter& painter,
 		DrawMcuPwm::McuPwmSettings settings,
-		//McuPwmSettings& settings,
-		//int fps,
 		uint64_t indexOfThisFrame,
 		double fanCenter,
 		double fanRadiusPx)
@@ -239,7 +147,7 @@ namespace DrawMcuPwm
 
 		const uint32_t rgbLedCount = settings.getRgbLedCount();
 
-		uint64_t bitsPerFrame = 0;
+		uint64_t bitsPerFrameStatistic = 0;
 
 		for (uint64_t pulseIndex = 0; globalCurrentAngleDegrees < maxGlobalAngleThisRepaint; pulseIndex++)
 		{
@@ -258,7 +166,6 @@ namespace DrawMcuPwm
 					double radius3 = radius2 + ledStepPx * rgbLedCount * pow((double)(rgbLedCount-i-1) / rgbLedCount, 0.8);
 					uint8_t brightness = rand() % 256;
 
-					bitsPerFrame += (1ULL << settings.colorBitDepth);
 
 					double spanAngle = brightness / 256.0 * maxSpanAngle;
 					QRectF r(
@@ -268,11 +175,13 @@ namespace DrawMcuPwm
 						radius3 * 2);
 					//painter.drawArc(r, (globalCurrentAngleDegrees - spanAngle / 2) * 16, spanAngle * 16);
 					drawLineFromArc(painter, r, (globalCurrentAngleDegrees - spanAngle / 2), spanAngle);
+					
+					bitsPerFrameStatistic += settings.colorBitDepth;
 				}
 			}
 			globalCurrentAngleDegrees += maxSpanAngle;
 		}
 
-		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = "<< bitsPerFrame<< std::endl;
+		std::cout << "Async paint time=" << t.elapsed() << "; bits/frame = "<< bitsPerFrameStatistic<< std::endl;
 	}
 };

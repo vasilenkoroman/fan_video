@@ -67,6 +67,7 @@ struct DrawContext
     int fps = 0;
     uint64_t frameNumber = 0;
     DrawMcuPwm::McuPwmSettings settingsPwm;
+    DrawWs2812::Ws2812Settings settingsWs2812;
 
 };
 
@@ -119,10 +120,10 @@ QImage drawAsync(const DrawContext& context)
 
     painter.setCompositionMode(QPainter::CompositionMode_Plus);
 
-    if (uiTab == UI_TAB_MCU_PWM)
-        DrawMcuPwm::draw(painter, context.settingsPwm,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
-    else if (uiTab == UI_TAB_WS2118)
-        DrawWs2812::draw();
+    //if (uiTab == UI_TAB_MCU_PWM)
+    //    DrawMcuPwm::draw(painter, context.settingsPwm,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
+   // else if (uiTab == UI_TAB_WS2118)
+        DrawWs2812::draw(painter, context.settingsWs2812,/*context.fps,*/ context.frameNumber, fanCenter, fanRadiusPx);
 
     painter.end();
 

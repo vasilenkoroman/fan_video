@@ -26,3 +26,20 @@ inline double fanAngleSpeedDegreesEverySec = fanRps * 360;
 * Used to calculate when begin new frame.
 For example 24 * 360 = 8640°.*/
 inline double fanAngleSpeedDegreesEveryFrame = fanAngleSpeedDegreesEverySec / simulationFps;
+
+inline void drawLineFromArc(QPainter& painter, QRectF r, double aStart, double aLength)
+{
+	double radius = r.width() / 2.0;
+	double center = r.x() + radius;
+
+	double startAngleRad = aStart * M_PI / 180.0;
+	double endAngleRad = (aStart + aLength) * M_PI / 180.0;
+
+	double xStart = center + radius * cos(-startAngleRad);
+	double yStart = center + radius * sin(-startAngleRad);
+
+	double xEnd = center + radius * cos(-endAngleRad);
+	double yEnd = center + radius * sin(-endAngleRad);
+
+	painter.drawLine(QPointF(xStart, yStart), QPointF(xEnd, yEnd));
+}
