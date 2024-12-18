@@ -13,6 +13,16 @@ namespace DrawMcuPwm
 
 	struct McuPwmSettings
 	{
+		int simulationFps = 24;
+
+		/* How many rotates every second make fan blade.
+		For example 24.
+		Common big fan on floor make 1000 rpm or 16.7 rps,
+		if (simulationFps == fanRps) sync is OK
+		*/
+		double fanRps = 22.0;
+
+
 		/*Type of PWM modulation.*/
 		enum PWM_ALIGNS
 		{
@@ -79,16 +89,23 @@ namespace DrawMcuPwm
 			return 1.0 / this->getMcuPwmCycleHz() * 1000000.0;
 		}
 
+		/* How many degrees moved blade every 1 second.
+		   For example 24 * 360 = 8640°. */
+		double fanAngleSpeedDegreesEverySec() const
+		{
+			return fanRps * 360;
+		}
+
 		/* How many PWM cycles will be every cinema frame.
 			For example if getMcuPwmCycleHz == 23437,5hz and kFps == 24
 			MCU_PWM_CYCLE_EVERY_FRAME = 23437,5 / 24 = 976,5625*/
 			//const double MCU_PWM_CYCLE_EVERY_REPAINT = getMcuPwmCycleHz / (double)fps;
 
-			/* How many degrees moved blade every 1 cycle of PWM.
-				For example 8640° / 23437,5hz = 0,36864°/pwmCycle.*/
+		/* How many degrees moved blade every 1 cycle of PWM.
+			For example 8640° / 23437,5hz = 0,36864°/pwmCycle.*/
 		double getMcuPwmCycleDegrees()
 		{
-			return fanAngleSpeedDegreesEverySec / this->getMcuPwmCycleHz();
+			return fanAngleSpeedDegreesEverySec() / this->getMcuPwmCycleHz();
 		}
 
 		/* Count of PWM outputs for MCU. For NRF52833 it equals 16.*/
@@ -135,6 +152,11 @@ namespace DrawMcuPwm
 
 		//McuPwmSettings settings;
 
+		/* How many degrees moved blade every 1 simulation frame.
+		 * Used to calculate when begin new frame.
+		 * For example 24 * 360 = 8640°.
+		 */
+		const double fanAngleSpeedDegreesEveryFrame = settings.fanAngleSpeedDegreesEverySec() / settings.simulationFps;
 
 		const double maxGlobalAngleThisRepaint = (indexOfThisFrame + 1) * fanAngleSpeedDegreesEveryFrame;
 		double globalCurrentAngleDegrees = indexOfThisFrame * fanAngleSpeedDegreesEveryFrame;
